@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>የቴዎድሮስ ኬሚስትሪ ምርምር ማዕከል</title>
+    <style>
+        :root {
+            --primary: #2ecc71;
+            --dark: #2c3e50;
+            --bg: #f4f7f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .lab-card {
+            background: white;
+            width: 90%;
+            max-width: 420px;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header h2 {
+            margin: 10px 0 5px;
+            color: var(--dark);
+        }
+
+        .header p {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .beaker-container {
+            width: 130px;
+            height: 160px;
+            border: 4px solid #bdc3c7;
+            border-top: none;
+            border-radius: 0 0 20px 20px;
+            margin: 20px auto;
+            position: relative;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        #fluid {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            background: var(--primary);
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: 2px solid #ecf0f1;
+            font-size: 16px;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: 0.3s;
+        }
+
+        button:active { transform: scale(0.95); }
+
+        #result-box {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            min-height: 80px;
+            border-left: 5px solid var(--primary);
+        }
+
+        .formula {
+            font-size: 24px;
+            color: #d35400;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .explanation {
+            font-size: 14px;
+            color: #34495e;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="lab-card">
+    <div class="header">
+        <div style="font-size: 50px;">🧪</div>
+        <h2>የቴዎድሮስ ምርምር ማዕከል</h2>
+        <p>የኬሚስትሪ ውህድ ፈጣሪ (v2.0)</p>
+    </div>
+
+    <div class="beaker-container">
+        <div id="fluid"></div>
+    </div>
+
+    <select id="el1"><option value="">-- ንጥረ ነገር 1 ምረጥ --</option></select>
+    <select id="el2"><option value="">-- ንጥረ ነገር 2 ምረጥ --</option></select>
+
+    <button onclick="startReaction()">ሙከራውን አከናውን 🚀</button>
+
+    <div id="result-box">
+        <div id="output">ውጤት እዚህ ይታያል...</div>
+    </div>
+</div>
+
+<script>
+    // ንጥረ ነገሮች ዝርዝር (1-118)
+    const elements = [
+        "Hydrogen", "Helium", "Lithium", "Beryllium", "Boron", "Carbon", "Nitrogen", "Oxygen", "Fluorine", "Neon",
+        "Sodium", "Magnesium", "Aluminum", "Silicon", "Phosphorus", "Sulfur", "Chlorine", "Argon", "Potassium", "Calcium",
+        "Scandium", "Titanium", "Vanadium", "Chromium", "Manganese", "Iron", "Cobalt", "Nickel", "Copper", "Zinc",
+        "Gallium", "Germanium", "Arsenic", "Selenium", "Bromine", "Krypton", "Rubidium", "Strontium", "Yttrium", "Zirconium",
+        "Niobium", "Molybdenum", "Technetium", "Ruthenium", "Rhodium", "Palladium", "Silver", "Cadmium", "Indium", "Tin",
+        "Antimony", "Tellurium", "Iodine", "Xenon", "Cesium", "Barium", "Lanthanum", "Cerium", "Praseodymium", "Neodymium",
+        "Promethium", "Samarium", "Europium", "Gadolinium", "Terbium", "Dysprosium", "Holmium", "Erbium", "Thulium", "Ytterbium",
+        "Lutetium", "Hafnium", "Tantalum", "Tungsten", "Rhenium", "Osmium", "Iridium", "Platinum", "Gold", "Mercury",
+        "Thallium", "Lead", "Bismuth", "Polonium", "Astatine", "Radon", "Francium", "Radium", "Actinium", "Thorium",
+        "Protactinium", "Uranium", "Neptunium", "Plutonium", "Americium", "Curium", "Berkelium", "Californium", "Einsteinium", "Fermium",
+        "Mendelevium", "Nobelium", "Lawrencium", "Rutherfordium", "Dubnium", "Seaborgium", "Bohrium", "Hassium", "Meitnerium", "Darmstadtium",
+        "Roentgenium", "Copernicium", "Nihonium", "Flerovium", "Moscovium", "Livermorium", "Tennessine", "Oganesson"
+    ];
+
+    const s1 = document.getElementById('el1');
+    const s2 = document.getElementById('el2');
+
+    elements.forEach((el, i) => {
+        let opt = `<option value="${el}">${i+1}. ${el}</option>`;
+        s1.innerHTML += opt;
+        s2.innerHTML += opt;
+    });
+
+    function startReaction() {
+        const val1 = s1.value;
+        const val2 = s2.value;
+        const fluid = document.getElementById('fluid');
+        const output = document.getElementById('output');
+
+        if(!val1 || !val2) return alert("እባክህ ሁለት ንጥረ ነገሮችን ምረጥ!");
+
+        fluid.style.height = "0%";
+        output.innerHTML = "በመቀላቀል ላይ...";
+
+        setTimeout(() => {
+            const data = getReactionData(val1, val2);
+            fluid.style.height = "85%";
+            fluid.style.backgroundColor = data.color;
+
+            output.innerHTML = `
+                <div class="formula">${data.eq}</div>
+                <div style="font-weight:bold; color:#2c3e50;">${data.name}</div>
+                <div class="explanation">${data.desc}</div>
+            `;
+
+            // ድምፅ እንዲያወጣ የሚያደርገው ትዕዛዝ
+            speakResult(data.name + ". " + data.desc);
+
+        }, 500);
+    }
+
+    function speakResult(text) {
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US'; 
+            utterance.rate = 0.9;
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    function getReactionData(a, b) {
+        const pair = [a, b].sort().join('+');
+        
+        const library = {
+            "Oxygen+Sodium": {
+                eq: "4Na + O₂ → 2Na₂O",
+                name: "Sodium Oxide (ሶዲየም ኦክሳይድ)",
+                color: "#f5f6fa",
+                desc: "ሶዲየም ከአክስጅን ጋር ሲገናኝ የሚፈጠር ነጭ ጠጣር ውህድ ነው።"
+            },
+            "Chlorine+Sodium": {
+                eq: "2Na + Cl₂ → 2NaCl",
+                name: "Sodium Chloride (የገበታ ጨው)",
+                color: "#ffffff",
+                desc: "ይህ በየቀኑ ለምግብነት የምንጠቀመው ጨው ሲሆን ኃይለኛ ሪአክሽን ይፈጥራል።"
+            },
+            "Hydrogen+Oxygen": {
+                eq: "2H₂ + O₂ → 2H₂O",
+                name: "Water (ውሃ)",
+                color: "#3498db",
+                desc: "ሁለት ጋዞች ተቀላቅለው ፈሳሽ ውሃ ይፈጥራሉ።"
+            },
+            "Carbon+Oxygen": {
+                eq: "C + O₂ → CO₂",
+                name: "Carbon Dioxide (ካርቦን ዳይኦክሳይድ)",
+                color: "#bdc3c7",
+                desc: "ለዕፅዋት እድገት አስፈላጊ የሆነና እኛ ወደ ውጭ የምናወጣው ጋዝ ነው።"
+            },
+            "Magnesium+Oxygen": {
+                eq: "2Mg + O₂ → 2MgO",
+                name: "Magnesium Oxide",
+                color: "#ecf0f1",
+                desc: "ማግኒዥየም በአክስጅን ውስጥ ሲቃጠል የሚፈጠር ብሩህ ነጭ ነበልባልና አመድ ነው።"
+            }
+        };
+
+        if (library[pair]) {
+            return library[pair];
+        } else if (a === b) {
+            return { eq: a, name: "ውህድ አልተፈጠረም", color: "#95a5a6", desc: "ተመሳሳይ ነገሮች ውህድ አይፈጥሩም።" };
+        } else {
+            return { 
+                eq: `${a} + ${b}`, 
+                name: "ያልታወቀ ውህድ", 
+                color: "#95a5a6", 
+                desc: "ለዚህ ጥምረት መረጃ በዳታቤዙ ውስጥ አልተገኘም።" 
+            };
+        }
+    }
+</script>
+
+</body>
+</html>
